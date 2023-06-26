@@ -69,9 +69,10 @@ def create_pointnet_components(blocks, in_channels, embed_dim, with_se=False, no
     return layers, in_channels, concat_channels
 
 
-def create_pointnet2_sa_components(sa_blocks, extra_feature_channels, embed_dim=64, use_att=False,
-                                   dropout=0.1, with_se=False, normalize=True, eps=0,
-                                   width_multiplier=1, voxel_resolution_multiplier=1):
+def create_pointnet2_sa_components(sa_blocks, extra_feature_channels,
+        embed_dim=64, use_att=False,
+        dropout=0.1, with_se=False, normalize=True, eps=0,
+        width_multiplier=1, voxel_resolution_multiplier=1):
     r, vr = width_multiplier, voxel_resolution_multiplier
     in_channels = extra_feature_channels + 3
 
@@ -90,10 +91,14 @@ def create_pointnet2_sa_components(sa_blocks, extra_feature_channels, embed_dim=
                 if voxel_resolution is None:
                     block = SharedMLP
                 else:
-                    block = functools.partial(PVConv, kernel_size=3, resolution=int(vr * voxel_resolution), attention=attention,
-                                              dropout=dropout,
-                                              with_se=with_se, with_se_relu=True,
-                                              normalize=normalize, eps=eps)
+                    block = functools.partial(PVConv,
+                        kernel_size=3,
+                        resolution=int(vr * voxel_resolution),
+                        attention=attention,
+                        dropout=dropout,
+                        with_se=with_se, with_se_relu=True,
+                        normalize=normalize,
+                        eps=eps)
 
                 if c == 0:
                     sa_blocks.append(block(in_channels, out_channels))
@@ -197,8 +202,10 @@ class PVCNN2Base(nn.Module):
         self.fp_layers = nn.ModuleList(fp_layers)
 
 
-        layers, _ = create_mlp_components(in_channels=channels_fp_features, out_channels=[128, dropout, num_classes], # was 0.5
-                                          classifier=True, dim=2, width_multiplier=width_multiplier)
+        layers, _ = create_mlp_components(
+            in_channels=channels_fp_features,
+            out_channels=[128, dropout, num_classes], # was 0.5
+            classifier=True, dim=2, width_multiplier=width_multiplier)
         self.classifier = nn.Sequential(*layers)
 
         self.embedf = nn.Sequential(

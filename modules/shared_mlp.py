@@ -8,6 +8,7 @@ class Swish(nn.Module):
     def forward(self,x):
         return  x * torch.sigmoid(x)
 
+
 class SharedMLP(nn.Module):
     def __init__(self, in_channels, out_channels, dim=1):
         super().__init__()

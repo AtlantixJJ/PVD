@@ -188,15 +188,16 @@ def visualize_pointcloud_batch(path, pointclouds, pred_labels, labels, categorie
         if vis_label:
             label = categories[labels[idx].item()]
             pred = categories[pred_labels[idx]]
-            colour = 'g' if label == pred else 'r'
-        elif target is None:
-
-            colour = 'g'
-        else:
-            colour = target[idx]
+        #    colour = 'g' if label == pred else 'r'
+        #elif target is None:
+        #    colour = 'g'
+        #else:
+        #    colour = target[idx]
+        #color = (pc[:, 6:].cpu().numpy() * 127.5 + 1).astype("uint8")
+        color = pc[:, 6:].clamp(-1, 1).cpu().numpy() / 2 + 0.5
         pc = pc.cpu().numpy()
         ax = fig.add_subplot(nrows, ncols, idx + 1, projection='3d')
-        ax.scatter(pc[:, 0], pc[:, 2], pc[:, 1], c=colour, s=5)
+        ax.scatter(pc[:, 0], pc[:, 2], pc[:, 1], c=color, s=5)
         ax.view_init(elev=elev, azim=azim)
         ax.axis('off')
         if vis_label:
