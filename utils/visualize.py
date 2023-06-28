@@ -145,6 +145,7 @@ def visualize_voxels(out_file, voxels, num_shown=16, threshold=0.5):
     plt.savefig(out_file, bbox_inches='tight')
     plt.close()
 
+
 def visualize_pointcloud(points, normals=None,
                          out_file=None, show=False, elev=30, azim=225):
     r''' Visualizes point cloud data.

@@ -745,7 +745,7 @@ class PointTransformerCond(nn.Module):
         """
         B, D, N = data.shape
         # convert batched point cloud to compact form (B * N, D)
-        data = data.permute(0, 2, 1).view(-1, D).contiguous()
+        data = data.permute(0, 2, 1).contiguous().view(-1, D)
         coord = data[:, :3].contiguous()
         offset = torch.Tensor([N * (i + 1) for i in range(B)]).to(data).int()
         t_embed = self.time_embed(timestep_embedding(timestep, self.cond_channels))

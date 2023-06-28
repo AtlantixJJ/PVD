@@ -262,6 +262,7 @@ class GaussianDiffusion:
         assert isinstance(shape, (tuple, list))
         img_t = noise_fn(size=shape, dtype=torch.float, device=device)
         for t in reversed(range(0, self.num_timesteps if not keep_running else len(self.betas))):
+            print(t)
             t_ = torch.empty(shape[0], dtype=torch.int64, device=device).fill_(t)
             img_t = self.p_sample(
                 denoise_fn=denoise_fn,
@@ -705,13 +706,13 @@ def train(gpu, opt, output_dir, noises_init):
                 kl_stats['terms_bpd'].item(), kl_stats['prior_bpd_b'].item(), kl_stats['mse_bt'].item()
             ))
 
-        if (epoch + 1) % opt.vizIter == 0 and should_diag:
+        if epoch % opt.vizIter == 0 and should_diag:
             logger.info('Generation: eval')
 
             model.eval()
             with torch.no_grad():
                 x_gen_eval = model.gen_samples(
-                    torch.Size([25] + list(x.shape[1:])),
+                    torch.Size([4] + list(x.shape[1:])),
                     x.device, clip_denoised=False)
                 x_gen_list = model.gen_sample_traj(
                     torch.Size([1] + list(x.shape[1:])),
@@ -730,11 +731,11 @@ def train(gpu, opt, output_dir, noises_init):
                 ))
 
             visualize_pointcloud_batch(
-                '%s/epoch_%03d_samples_eval.png' % (outf_syn, epoch),
+                '%s/epoch_%03d_%d_samples_eval.png' % (outf_syn, opt.rank, epoch),
                 x_gen_eval.transpose(1, 2), None, None, None)
 
             visualize_pointcloud_batch(
-                '%s/epoch_%03d_samples_eval_all.png' % (outf_syn, epoch),
+                '%s/epoch_%03d_%d_samples_eval_all.png' % (outf_syn, opt.rank, epoch),
                 x_gen_all.transpose(1, 2), None, None, None)
 
             x_disp = x.transpose(1, 2)
@@ -743,7 +744,7 @@ def train(gpu, opt, output_dir, noises_init):
                 x_disp, None, None, None)
             x_disp = x_disp.detach().cpu()
             colors = ((x_disp[0, :, 6:9].clamp(-1, 1) + 1) * 127.5).numpy().astype("uint8")
-            path = '%s/epoch_%03d_x.ply' % (outf_syn, epoch)
+            path = '%s/epoch_%03d_%d_x.ply' % (outf_syn, opt.rank, epoch)
             # 3 is a scaling factor. Points locate in [~-3, ~3]
             trimesh.PointCloud(x_disp[0, :, :3] * 3, colors).export(path)
 
@@ -791,6 +792,7 @@ def main():
         mp.spawn(train, nprocs=opt.ngpus_per_node, args=(opt, output_dir, noises_init))
     else:
         train(opt.gpu, opt, output_dir, noises_init)
+
 
 def parse_args():
 
@@ -857,6 +859,7 @@ def parse_args():
     opt = parser.parse_args()
 
     return opt
+
 
 if __name__ == '__main__':
     main()
